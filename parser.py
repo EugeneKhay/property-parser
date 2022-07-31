@@ -5,7 +5,6 @@
 # python3 parser.py ./source_dir ./target_dir
 
 import os
-import sys
 import json
 import argparse
 from os.path import exists
@@ -17,17 +16,18 @@ JSON_EXTENSION = '.json'
 parser = argparse.ArgumentParser()
 parser.add_argument("-s", "--source", help="Source path")
 parser.add_argument("-t", "--target", help="Target path")
-parser.add_argument("-ct", "--createtarget", help="Should target be created if not exists", type=int)
+parser.add_argument("-ct", "--createtarget", 
+                    help="Should target be created if not exists: 0 - false, 1 - true", 
+                    type=int)
 args = parser.parse_args()
 
 target_dir = args.target
 
-# param: 0 -False, 1 - True
 def is_creating_files_mode():
     if args.createtarget != None:
         value = args.createtarget
         if (value != 0 and value != 1):
-            print('Wrong parameter -cp provided. Only 0 and 1 are allowed')
+            print('Wrong parameter -cp provided. Only 0 as false and 1 as true are allowed')
             exit()
         return bool(args.createtarget)
     return True
