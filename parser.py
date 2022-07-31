@@ -11,9 +11,9 @@ from os.path import exists
 from jproperties import Properties
 
 ARGS_MINIMAL_NUMBER = 3
-TARGET_DIR = sys.argv[2]
 PROPERTIES_EXTENSION = '.properties'
-JSON_EXTENSION = '.json' 
+JSON_EXTENSION = '.json'
+TARGET_DIR = sys.argv[2] 
     
 def parse():          
     if len(sys.argv) < ARGS_MINIMAL_NUMBER:
@@ -26,22 +26,21 @@ def parse():
         if (not exists(TARGET_DIR)):
                 print(f'Target directory parameter {TARGET_DIR} does not exist, creating it ...')
                 os.makedirs(TARGET_DIR) 
-        source_dir = sys.argv[1]
+        source = sys.argv[1]
         
-        if os.path.isfile(source_dir) and source_dir.endswith(PROPERTIES_EXTENSION):
-            filename = source_dir.rsplit(os.sep, 1)[1]
-            print(filename)
-            print(source_dir)
-            write_props_to_json(filename, source_dir)
+        if os.path.isfile(source) and source.endswith(PROPERTIES_EXTENSION):
+            filename = source.rsplit(os.sep, 1)[1]
+            write_props_to_json(filename, source)
         else:    
-            files_list = os.listdir(source_dir)
+            files_list = os.listdir(source)
             for file in files_list:
                 if (file.endswith(PROPERTIES_EXTENSION)):
-                    path = f'{source_dir}/{file}'
+                    path = f'{source}/{file}'
                     print(f'Processing file: {path} ...')
-                    write_props_to_json(file, path)        
+                    write_props_to_json(file, path)  
+                          
     except FileNotFoundError:
-        print(f'Source directory parameter {source_dir} is incorrect')
+        print(f'Source directory parameter {source} is incorrect')
         exit()
         
             
