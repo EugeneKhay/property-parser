@@ -11,7 +11,6 @@ import argparse
 from os.path import exists
 from jproperties import Properties
 
-ARGS_MINIMAL_NUMBER = 3
 PROPERTIES_EXTENSION = '.properties'
 JSON_EXTENSION = '.json'
 
@@ -26,6 +25,10 @@ target_dir = args.target
 # param: 0 -False, 1 - True
 def is_creating_files_mode():
     if args.createtarget != None:
+        value = args.createtarget
+        if (value != 0 and value != 1):
+            print('Wrong parameter -cp provided. Only 0 and 1 are allowed')
+            exit()
         return bool(args.createtarget)
     return True
     
@@ -46,7 +49,8 @@ def parse():
                 os.makedirs(target_dir)
             else:
                 print(f'Target directory parameter {target_dir} does not exist, exiting ...')
-                exit()  
+                exit()
+                  
         source = args.source
         
         if os.path.isfile(source) and source.endswith(PROPERTIES_EXTENSION):
@@ -54,6 +58,8 @@ def parse():
             write_props_to_json(filename, source)
         else:    
             files_list = os.listdir(source)
+            if len(files_list) == 0:
+                print(f'Source dir {source} is empty')
             for file in files_list:
                 if (file.endswith(PROPERTIES_EXTENSION)):
                     path = f'{source}/{file}'
@@ -61,7 +67,7 @@ def parse():
                     write_props_to_json(file, path)  
                           
     except FileNotFoundError:
-        print(f'Source directory parameter {source} is incorrect')
+        print(f'Source parameter {source} is incorrect')
         exit()
         
             
