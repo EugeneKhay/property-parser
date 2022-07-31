@@ -7,7 +7,7 @@ import json
 import argparse
 from os.path import exists
 from jproperties import Properties
-from dictdiffer import diff, patch, swap, revert
+from dictdiffer import diff
 
 PROPERTIES_EXTENSION = '.properties'
 JSON_EXTENSION = '.json'
