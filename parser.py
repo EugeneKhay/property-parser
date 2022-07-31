@@ -1,4 +1,5 @@
 # pip3 install jproperties
+# pip3 install dictdiffer
 # Description: python3 parser.py -h
 
 import os
@@ -6,6 +7,7 @@ import json
 import argparse
 from os.path import exists
 from jproperties import Properties
+from dictdiffer import diff, patch, swap, revert
 
 PROPERTIES_EXTENSION = '.properties'
 JSON_EXTENSION = '.json'
@@ -44,7 +46,28 @@ def is_info_mode():
           
 # todo implement full naming            
 def create_json_file_name(properties_file):
-    return target_dir + '/' + properties_file.rsplit('.', 1)[0] + JSON_EXTENSION        
+    return target_dir + '/' + properties_file.rsplit('.', 1)[0] + JSON_EXTENSION
+
+
+def print_changes_info(old_json, new_json):        
+        print()
+        change_counter = 0 
+        add_counter = 0 
+        remove_counter = 0
+        
+        for t, key, value in list(diff(old_json, new_json)):
+            if t == 'change':
+                print(f'Changed: {key}, {value[0]} -> {value[1]}')
+                change_counter += 1
+            if t == 'add':
+                for key, value in value:
+                    print(f'Added: {key} = {value}')
+                    add_counter += 1
+            if t == 'remove':
+                for key, value in value:
+                    print(f'Removed: {key} = {value}')
+                    remove_counter += 1
+        print('\n' + f'Total: changed - {change_counter}, added - {add_counter}, removed - {remove_counter}')            
             
             
 def write_props_to_json(properties_file, full_path):
@@ -66,7 +89,7 @@ def write_props_to_json(properties_file, full_path):
         with open(json_file) as f_in:
             old_json = json.load(f_in)
     except Exception:
-        pass          
+        pass  # empty target file         
         
     with open(json_file, "w") as outfile:
         json.dump(new_json, outfile, indent=2)
@@ -74,12 +97,9 @@ def write_props_to_json(properties_file, full_path):
         print(f'File {json_file} {c}')
     
     if show_info:
-        added = { k : new_json[k] for k in set(new_json) - set(old_json) }
-        removed = { k : old_json[k] for k in set(old_json) - set(new_json) }
-        print(f'Added: {json.dumps(added, indent=2)}')
-        print(f'Removed: {json.dumps(removed, indent=2)}')                 
-       
-            
+        print_changes_info(old_json, new_json)        
+          
+        
 def main():          
     if not args.source:
         print('No source provided')
