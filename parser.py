@@ -1,8 +1,5 @@
 # pip3 install jproperties
-
-# Script should be triggered with at least 3 parameters:
-# script name, source directory, target directory, i.e:
-# python3 parser.py ./source_dir ./target_dir
+# Description: python3 parser.py -h
 
 import os
 import json
@@ -19,28 +16,81 @@ parser.add_argument("-t", "--target", help="Target path")
 parser.add_argument("-ct", "--createtarget", 
                     help="Should target be created if not exists: 0 - false, 1 - true", 
                     type=int)
+parser.add_argument("-i", "--info", 
+                    help="Shows info about changed values", 
+                    type=int)
 args = parser.parse_args()
 
 target_dir = args.target
+show_info = False
+
+
+def read_bool_cli_flag(arg, name_for_error, default_value):
+    if arg != None:
+        if (arg != 0 and arg != 1):
+            print(f'Wrong parameter for {name_for_error} provided. Only 0 as false and 1 as true are allowed')
+            exit()
+        return bool(arg)
+    return default_value 
+
 
 def is_creating_files_mode():
-    if args.createtarget != None:
-        value = args.createtarget
-        if (value != 0 and value != 1):
-            print('Wrong parameter -cp provided. Only 0 as false and 1 as true are allowed')
-            exit()
-        return bool(args.createtarget)
-    return True
+    return read_bool_cli_flag(args.createtarget, "-ct", True)
+
+
+def is_info_mode():
+    return read_bool_cli_flag(args.info, "-i", True)
+
+          
+# todo implement full naming            
+def create_json_file_name(properties_file):
+    return target_dir + '/' + properties_file.rsplit('.', 1)[0] + JSON_EXTENSION        
+            
+            
+def write_props_to_json(properties_file, full_path):
+    configs = Properties()
+    old_json = {}
+
+    with open(full_path, 'rb') as config_file:
+        configs.load(config_file)
+        
+    items = configs.items()
+    new_json = {}
+
+    for item in items:
+        new_json[item[0]] = item[1].data
+            
+    json_file = create_json_file_name(properties_file)
     
+    try:
+        with open(json_file) as f_in:
+            old_json = json.load(f_in)
+    except Exception:
+        pass          
+        
+    with open(json_file, "w") as outfile:
+        json.dump(new_json, outfile, indent=2)
+        c = 'created' if len(old_json) == 0 else 'updated'
+        print(f'File {json_file} {c}')
     
-def parse():          
+    if show_info:
+        added = { k : new_json[k] for k in set(new_json) - set(old_json) }
+        removed = { k : old_json[k] for k in set(old_json) - set(new_json) }
+        print(f'Added: {json.dumps(added, indent=2)}')
+        print(f'Removed: {json.dumps(removed, indent=2)}')                 
+       
+            
+def main():          
     if not args.source:
         print('No source provided')
         exit()
     if not args.target:
         print('No target provided')
-        exit()    
+        exit()
         
+    global show_info
+    show_info = is_info_mode()    
+    
     try:
         global target_dir
         if (not exists(target_dir)):
@@ -69,30 +119,6 @@ def parse():
     except FileNotFoundError:
         print(f'Source parameter {source} is incorrect')
         exit()
-        
-            
-def create_json_file_name(properties_file):
-    return target_dir + '/' + properties_file.rsplit('.', 1)[0] + JSON_EXTENSION        
-            
-            
-def write_props_to_json(properties_file, full_path):
-    configs = Properties()
-
-    with open(full_path, 'rb') as config_file:
-        configs.load(config_file)
-        
-    items = configs.items()
-    dict = {}
-
-    for item in items:
-        dict[item[0]] = item[1].data
-            
-    json_file = create_json_file_name(properties_file)  
-        
-    with open(json_file, "w") as outfile:
-        json.dump(dict, outfile, indent=2)
-        print(f'File {json_file} created')            
-            
-            
+                    
 if __name__ == '__main__':
-    parse()            
+    main()            
