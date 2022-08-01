@@ -115,12 +115,13 @@ def main():
     
     try:
         global target_dir
+        
         if (not exists(target_dir)):
             if is_creating_files_mode():
                 if str(target_dir).endswith(JSON_EXTENSION):
                     dirs = str(target_dir).rsplit('/', 1)[0]
-                    print(f'Target directory {dirs} does not exist, creating it ...')
-                    if dirs != '.':   # if root dir, not needed to create dirs
+                    if dirs != '.':
+                        print(f'Target directory {dirs} does not exist, creating it ...')
                         os.makedirs(dirs)
                 else:    
                     print(f'Target directory {target_dir} does not exist, creating it ...')
@@ -147,6 +148,7 @@ def main():
     except FileNotFoundError:
         print(f'Source parameter {source} is incorrect')
         exit()
+            
                     
 if __name__ == '__main__':
     main()            
