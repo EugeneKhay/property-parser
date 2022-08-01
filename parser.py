@@ -46,6 +46,8 @@ def is_info_mode():
           
 # todo implement full naming            
 def create_json_file_name(properties_file):
+    if str(target_dir).endswith(JSON_EXTENSION):
+        return target_dir
     return target_dir + '/' + properties_file.rsplit('.', 1)[0] + JSON_EXTENSION
 
 
@@ -115,8 +117,14 @@ def main():
         global target_dir
         if (not exists(target_dir)):
             if is_creating_files_mode():
-                print(f'Target directory parameter {target_dir} does not exist, creating it ...')
-                os.makedirs(target_dir)
+                if str(target_dir).endswith(JSON_EXTENSION):
+                    dirs = str(target_dir).rsplit('/', 1)[0]
+                    print(f'Target directory {dirs} does not exist, creating it ...')
+                    if dirs != '.':   # if root dir, not needed to create dirs
+                        os.makedirs(dirs)
+                else:    
+                    print(f'Target directory {target_dir} does not exist, creating it ...')
+                    os.makedirs(target_dir)
             else:
                 print(f'Target directory parameter {target_dir} does not exist, exiting ...')
                 exit()
